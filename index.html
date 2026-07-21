@@ -251,10 +251,15 @@ CME điện tử
 </div>
 
 <script>
+const API = "https://script.google.com/macros/s/AKfycbyvEJ_8w4RrctxYcsqZJiSep3HwuAhgzNAxpIzmBuF9LUKar-1OkdP2LfYscprpOzB6/exec";
 
-google.script.run
-.withSuccessHandler(loadCourses)
-.getCourses();
+fetch(API + "?action=courses")
+  .then(res=>res.json())
+  .then(loadCourses)
+  .catch(err=>{
+    console.error(err);
+    alert("Không tải được danh sách khóa học.");
+  });
 
 function loadCourses(courses){
 
@@ -322,15 +327,22 @@ function searchCert(){
   // KHÓA NÚT
   document.getElementById('searchBtn').disabled = true;
 
-  google.script.run
-    .withSuccessHandler(function(res){
+  fetch(
+    API +
+    "?action=search" +
+    "&course=" + encodeURIComponent(course) +
+    "&name=" + encodeURIComponent(name) +
+    "&year=" + encodeURIComponent(year)
+)
+.then(res=>res.json())
+.then(function(res){
 
       document.getElementById('loading').style.display = 'none';
       document.getElementById('searchBtn').disabled = false;
 
       showResult(res);
-    })
-    .withFailureHandler(function(err){
+})
+.catch(function(err){
 
       document.getElementById('loading').style.display = 'none';
       document.getElementById('searchBtn').disabled = false;
@@ -339,12 +351,7 @@ function searchCert(){
       '<div class="error">Có lỗi xảy ra</div>';
 
       console.error(err);
-    })
-    .searchCertificate(
-      course,
-      name,
-      year
-    );
+});
 }
 
 function showResult(res){
